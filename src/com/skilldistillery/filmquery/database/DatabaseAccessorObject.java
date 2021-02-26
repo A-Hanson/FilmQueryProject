@@ -1,0 +1,108 @@
+package com.skilldistillery.filmquery.database;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.sql.*;
+
+import com.skilldistillery.filmquery.entities.Actor;
+import com.skilldistillery.filmquery.entities.Film;
+
+public class DatabaseAccessorObject implements DatabaseAccessor {
+	private static final String URL = "jdbc:mysql://localhost:3306/sdvid?useSSL=false";
+	private static final String USER = "student";
+	private static final String PWORD = "student";
+	static {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public Film findFilmById(int filmId) {
+		Film film = null;
+		try {
+			Connection conn = DriverManager.getConnection(URL, USER, PWORD);
+			String sql = "SELECT * FROM film WHERE id = ?";
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, filmId);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				film = new Film(rs.getInt("id"),
+								rs.getString("title"),
+								rs.getString("description"),
+								rs.getInt("release_year"),
+								rs.getInt("language_id"),
+								rs.getInt("rental_duration"),
+								rs.getDouble("rental_rate"),
+								rs.getInt("length"),
+								rs.getDouble("replacement_cost"),
+								rs.getString("rating"),
+								rs.getString("special_features"));
+				film.setActors(findActorsByFilmId(filmId));
+			}
+			rs.close();
+			stmt.close();
+			conn.close();
+		}
+		catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return film;
+	}
+
+	@Override
+	public Actor findActorById(int actorId) {
+		Actor actor = null;
+		try {
+			Connection conn = DriverManager.getConnection(URL, USER, PWORD);
+			String sql = "SELECT * FROM actor WHERE id = ?";
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, actorId);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				actor = new Actor(rs.getInt("id"),
+									rs.getString("first_name"),
+									rs.getString("last_name"));
+			}
+			rs.close();
+			stmt.close();
+			conn.close();
+		}
+		catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return actor;
+	}
+
+	@Override
+	public List<Actor> findActorsByFilmId(int filmId) {
+		List<Actor> actors = new ArrayList<Actor>();
+		try {
+			Connection conn = DriverManager.getConnection(URL, USER, PWORD);
+			String sql = "SELECT actor.id, actor.first_name, actor.last_name "
+					+ "FROM film JOIN film_actor ON film.id = film_actor.film_id "
+					+ "JOIN actor ON film_actor.actor_id = actor.id WHERE film.id = ?";
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, filmId);
+			ResultSet rs = stmt.executeQuery();
+			// use while loop for populating a list.
+			while (rs.next()) {
+				Actor actor = new Actor(rs.getInt("actor.id"),
+										rs.getString("actor.first_name"),
+										rs.getString("actor.last_name"));
+				actors.add(actor);
+			}
+			rs.close();
+			stmt.close();
+			conn.close();
+		}
+		catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return actors;
+	}
+
+}
