@@ -17,7 +17,9 @@ This application uses the JDBC (Java Data Base Connectivity) API to connect to a
 ---
 
 ### How to Run
+Run from FilmQueryApp.java inside the app folder
 
 ---
 
 ### Lessons Learned
+I learned to fully investigate the tables I was pulling data from before creating my code. Based on the phrasing of the stretch goal of adding all the film's categories, I assumed it was a many-to-many relationship. I went through the initial set up with my java code to read in a list of category objects. Then when I was using the database to set up my search query, I found that each film only had one category. I ran a COUNT(UNIQUE film_id) on the associative table that it was 1000, the exact same number as the id's from the film table. I then had to refactor my code to set the category to just a String variable.
