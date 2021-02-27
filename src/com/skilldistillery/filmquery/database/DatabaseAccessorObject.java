@@ -25,7 +25,7 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 		Film film = null;
 		try {
 			Connection conn = DriverManager.getConnection(URL, USER, PWORD);
-			String sql = "SELECT * FROM film WHERE id = ?";
+			String sql = "SELECT * FROM film JOIN language ON film.language_id = language.id  WHERE film.id = ?";
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			stmt.setInt(1, filmId);
 			ResultSet rs = stmt.executeQuery();
@@ -40,7 +40,8 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 								rs.getInt("length"),
 								rs.getDouble("replacement_cost"),
 								rs.getString("rating"),
-								rs.getString("special_features"));
+								rs.getString("special_features"),
+								rs.getString("name"));
 				film.setActors(findActorsByFilmId(filmId));
 			}
 			rs.close();
@@ -103,6 +104,32 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 			System.out.println(e.getMessage());
 		}
 		return actors;
+	}
+
+
+	@Override
+	public List<Film> findFilmByKeyword(String keyWord) {
+		List<Film> films = new ArrayList<>();
+		try {
+			Connection conn = DriverManager.getConnection(URL, USER, PWORD);
+			String sql = "SELECT * FROM film WHERE (title LIKE ?) OR (description LIKE ?)";
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setString(1, "%" + keyWord + "%");
+			stmt.setString(2, "%" + keyWord + "%");
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				int id = rs.getInt("id");
+				Film film = findFilmById(id);
+				films.add(film);
+			}
+			rs.close();
+			stmt.close();
+			conn.close();
+		}
+		catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return films;
 	}
 
 }
