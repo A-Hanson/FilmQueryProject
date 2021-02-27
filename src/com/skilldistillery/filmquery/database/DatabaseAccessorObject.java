@@ -1,11 +1,16 @@
 package com.skilldistillery.filmquery.database;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.sql.*;
 
 import com.skilldistillery.filmquery.entities.Actor;
 import com.skilldistillery.filmquery.entities.Film;
+import com.skilldistillery.filmquery.entities.InventoryItem;
 
 public class DatabaseAccessorObject implements DatabaseAccessor {
 	private static final String URL = "jdbc:mysql://localhost:3306/sdvid?useSSL=false";
@@ -25,7 +30,12 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 		Film film = null;
 		try {
 			Connection conn = DriverManager.getConnection(URL, USER, PWORD);
-			String sql = "SELECT * FROM film JOIN language ON film.language_id = language.id  WHERE film.id = ?";
+			String sql = "SELECT * "
+					+ "FROM film "
+					+ "JOIN language ON film.language_id = language.id  "
+					+ "JOIN film_category ON film.id = film_category.film_id "
+					+ "JOIN category ON film_category.category_id = category.id "
+					+ "WHERE film.id = ?";
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			stmt.setInt(1, filmId);
 			ResultSet rs = stmt.executeQuery();
@@ -41,8 +51,10 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 								rs.getDouble("replacement_cost"),
 								rs.getString("rating"),
 								rs.getString("special_features"),
-								rs.getString("name"));
+								rs.getString("name"),
+								rs.getString("category.name"));
 				film.setActors(findActorsByFilmId(filmId));
+				film.setInventory(getFilmInventory(filmId));
 			}
 			rs.close();
 			stmt.close();
@@ -131,5 +143,32 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 		}
 		return films;
 	}
-
+	
+	
+	private List<InventoryItem> getFilmInventory(int filmId){
+		List<InventoryItem> inventory = new ArrayList<>();
+		try {
+			Connection conn = DriverManager.getConnection(URL, USER, PWORD);
+			String sql = "SELECT * FROM inventory_item  WHERE film_id = ?";
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, filmId);
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				InventoryItem item = new InventoryItem(
+											rs.getInt("id"),
+											rs.getInt("film_id"),
+											rs.getInt("store_id"),
+											rs.getString("media_condition"),
+											rs.getTimestamp("last_update").toLocalDateTime());
+				inventory.add(item);
+			}
+			rs.close();
+			stmt.close();
+			conn.close();
+		}
+		catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return inventory;
+	}
 }

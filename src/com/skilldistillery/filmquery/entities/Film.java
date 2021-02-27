@@ -17,6 +17,8 @@ public class Film {
 	private String specialFeatures;
 	private String language;
 	private List<Actor> actors;
+	private String category;
+	private List<InventoryItem> inventory;
 	
 	public Film() {
 		super();
@@ -24,7 +26,8 @@ public class Film {
 
 
 	public Film(int id, String title, String description, Integer releaseYear, int languageId, int rentalDuration,
-			double rentalRate, Integer length, double replacementCost, String rating, String specialFeatures, String language) {
+			double rentalRate, Integer length, double replacementCost, String rating, String specialFeatures,
+			String language, String category) {
 		super();
 		this.id = id;
 		this.title = title;
@@ -39,6 +42,7 @@ public class Film {
 		this.specialFeatures = specialFeatures;
 		this.setLanguage(language);
 		this.actors = new ArrayList<>();
+		this.category = category;
 	}
 
 	public int getId() {
@@ -146,6 +150,26 @@ public class Film {
 	}
 
 
+	public String getCategory() {
+		return category;
+	}
+
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+
+	public List<InventoryItem> getInventory() {
+		return inventory;
+	}
+
+
+	public void setInventory(List<InventoryItem> inventory) {
+		this.inventory = inventory;
+	}
+
+
 	@Override
 	public String toString() {
 		if (actors.size() == 0) {
@@ -165,6 +189,12 @@ public class Film {
 				sb.append(actor.getFullName() + ", ");
 			}
 			sb.delete(sb.length()-2, sb.length());
+			sb.append(", category=").append(category);
+			sb.append(", inventory=");
+			for (InventoryItem item : inventory) {
+				sb.append("item id: " + item.getId() + ", condition: " + item.getMediaCondition() + "; ");
+			}
+			sb.delete(sb.length()-2, sb.length());
 			sb.append("]");
 			return sb.toString();
 		}
@@ -176,8 +206,10 @@ public class Film {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((actors == null) ? 0 : actors.hashCode());
+		result = prime * result + ((category == null) ? 0 : category.hashCode());
 		result = prime * result + ((description == null) ? 0 : description.hashCode());
 		result = prime * result + id;
+		result = prime * result + ((inventory == null) ? 0 : inventory.hashCode());
 		result = prime * result + ((language == null) ? 0 : language.hashCode());
 		result = prime * result + languageId;
 		result = prime * result + ((length == null) ? 0 : length.hashCode());
@@ -209,12 +241,22 @@ public class Film {
 				return false;
 		} else if (!actors.equals(other.actors))
 			return false;
+		if (category == null) {
+			if (other.category != null)
+				return false;
+		} else if (!category.equals(other.category))
+			return false;
 		if (description == null) {
 			if (other.description != null)
 				return false;
 		} else if (!description.equals(other.description))
 			return false;
 		if (id != other.id)
+			return false;
+		if (inventory == null) {
+			if (other.inventory != null)
+				return false;
+		} else if (!inventory.equals(other.inventory))
 			return false;
 		if (language == null) {
 			if (other.language != null)
@@ -256,6 +298,8 @@ public class Film {
 			return false;
 		return true;
 	}
+
+
 
 	
 	

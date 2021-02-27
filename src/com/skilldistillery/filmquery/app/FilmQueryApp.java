@@ -8,6 +8,7 @@ import com.skilldistillery.filmquery.database.DatabaseAccessor;
 import com.skilldistillery.filmquery.database.DatabaseAccessorObject;
 import com.skilldistillery.filmquery.entities.Actor;
 import com.skilldistillery.filmquery.entities.Film;
+import com.skilldistillery.filmquery.entities.InventoryItem;
 
 public class FilmQueryApp {
 
@@ -15,15 +16,15 @@ public class FilmQueryApp {
 
 	public static void main(String[] args) {
 		FilmQueryApp app = new FilmQueryApp();
-//    app.test();
+//		app.test();
 		app.launch();
 	}
 
 //	private void test() {
 //		Film film = db.findFilmById(1);
-//		Actor actor = db.findActorById(1);
+////		Actor actor = db.findActorById(1);
 //		System.out.println(film);
-//		System.out.println(actor);
+////		System.out.println(actor);
 //	}
 
 	private void launch() {
@@ -144,10 +145,16 @@ public class FilmQueryApp {
 								.append("\nYear Released: ").append(f.getReleaseYear())
 								.append("\nRating: ").append(f.getRating())
 								.append("\nLanguage: ").append(f.getLanguage())
+								.append("\nCategory: ").append(f.getCategory())
 								.append("\nDescription: ").append(f.getDescription())
 								.append("\nActors: ");
 		for (Actor actor : f.getActors()) {
 			sb.append(actor.getFullName() + ", ");
+		}
+		sb.delete(sb.length()-2, sb.length());
+		sb.append("\nCopies in Inventory: ");
+		for (InventoryItem item : f.getInventory()) {
+			sb.append("Copy id: " + item.getId() + ", condition: " + item.getMediaCondition() + "; ");
 		}
 		sb.delete(sb.length()-2, sb.length());
 		System.out.println(sb.toString());
